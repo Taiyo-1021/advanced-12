@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spoken Shortcuts — Advanced Pronunciation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#06091a;overflow:hidden;height:100vh;width:100vw}
+#app{width:100vw;height:100vh;display:flex;flex-direction:column}
+#progress{position:fixed;top:0;left:0;height:5px;background:linear-gradient(90deg,#1B5E20,#81C784);z-index:99;transition:width .3s ease;border-radius:0 3px 3px 0}
+#slides{flex:1;position:relative;overflow:hidden;min-height:0}
+.slide{position:absolute;inset:0;display:none;flex-direction:column}
+.slide.active{display:flex}
+
+/* NAV */
+#nav{height:48px;background:#060714;display:flex;align-items:center;justify-content:center;gap:14px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08)}
+#nav button{background:rgba(255,255,255,.1);border:none;color:#fff;font-size:13px;padding:6px 20px;border-radius:20px;cursor:pointer;transition:background .2s;font-family:inherit;letter-spacing:.3px}
+#nav button:hover{background:rgba(255,255,255,.22)}
+#nav button:disabled{opacity:.25;cursor:default}
+#counter{color:rgba(255,255,255,.45);font-size:12px;min-width:60px;text-align:center}
+
+/* SHARED */
+.s-head{padding:12px 30px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0;letter-spacing:.2px}
+.badge{background:rgba(255,255,255,.16);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600}
+.s-body{flex:1;display:flex;padding:0 26px 12px;gap:22px;min-height:0;overflow:hidden}
+.student-badge{background:#1B5E20;color:#fff;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.hl{color:#81C784;font-weight:900}
+.sc{display:inline-block;background:#1B5E20;color:#fff;border-radius:4px;padding:1px 7px;font-size:.88em;font-weight:700}
+
+/* TITLE */
+.title-slide{background:linear-gradient(140deg,#06091a 0%,#021505 55%,#06091a 100%);align-items:center;justify-content:center;text-align:center}
+.title-slide h1{font-size:clamp(26px,4vw,58px);font-weight:900;color:#fff;line-height:1;letter-spacing:-2px}
+.title-slide h1 em{font-style:normal;background:linear-gradient(90deg,#66BB6A,#C8E6C9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.title-sub{font-size:clamp(13px,1.7vw,19px);color:rgba(255,255,255,.6);margin-top:12px}
+.goal-box{margin-top:22px;background:rgba(27,94,32,.12);border:1.5px solid rgba(27,94,32,.5);border-radius:16px;padding:16px 28px;display:inline-block;text-align:left}
+.goal-box p{color:#C8E6C9;font-size:clamp(13px,1.5vw,17px);line-height:1.75}
+.adv-badge{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 16px;font-size:clamp(11px,1.2vw,13px);color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:1px;text-transform:uppercase}
+
+/* WARM-UP */
+.warmup-slide{background:#fff;flex-direction:column}
+.warmup-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 40px;gap:16px}
+.warmup-prompt{background:#E8F5E9;border-left:5px solid #1B5E20;border-radius:0 14px 14px 0;padding:16px 22px;font-size:clamp(13px,1.6vw,18px);font-weight:600;color:#1B5E20;max-width:820px;width:100%;line-height:1.65}
+.warmup-words{display:flex;gap:14px;flex-wrap:wrap;max-width:820px;width:100%}
+.warmup-word{background:#E8F5E9;border:2px solid rgba(27,94,32,.25);border-radius:12px;padding:14px 22px;text-align:center;flex:1;min-width:160px}
+.ww-text{font-size:clamp(15px,1.9vw,24px);font-weight:900;color:#1a1a1a}
+.ww-q{font-size:clamp(10px,1.1vw,12px);color:#888;margin-top:5px}
+.warmup-q{background:#E8F5E9;border-radius:10px;padding:10px 16px;font-size:clamp(12px,1.4vw,15px);color:#1B5E20;border:1.5px solid #81C784;max-width:820px;width:100%}
+.teacher-note{background:#E8F5E9;border:1px solid #81C784;border-radius:10px;padding:10px 18px;font-size:clamp(11px,1.25vw,14px);color:#1B5E20;max-width:820px;width:100%;line-height:1.6}
+
+/* KEY CONCEPT */
+.concept-slide{background:#fff;flex-direction:column}
+.concept-body{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 26px;min-height:0}
+.concept-cols{display:flex;gap:12px;flex:1;min-height:0}
+.concept-col{border-radius:14px;padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
+.cc-title{font-size:clamp(12px,1.4vw,15px);font-weight:900;margin-bottom:4px}
+.cc-body{font-size:clamp(11px,1.2vw,13px);line-height:1.6;color:#444}
+.sc-row{display:flex;flex-direction:column;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);gap:3px}
+.sc-row-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sc-full{font-size:clamp(11px,1.2vw,13px);color:#666}
+.sc-arrow{color:#81C784;font-size:12px;flex-shrink:0}
+.sc-ex{font-size:clamp(10px,1.05vw,11px);color:#888;font-style:italic;line-height:1.4}
+.concept-rule{background:#E8F5E9;border-radius:12px;padding:11px 18px;font-size:clamp(12px,1.3vw,15px);color:#1B5E20;font-weight:600;text-align:center;flex-shrink:0}
+
+/* PRON FOCUS */
+.pron-slide{background:#fff;flex-direction:column}
+.pron-body{flex:1;display:flex;gap:12px;padding:12px 26px 14px;min-height:0}
+.pron-col{flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.pron-group{border-radius:12px;padding:11px 14px;border:1.5px solid}
+.pg-title{font-size:clamp(12px,1.3vw,14px);font-weight:900;margin-bottom:6px}
+.pg-row{display:flex;align-items:baseline;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:clamp(11px,1.2vw,13px)}
+.pg-form{font-weight:700;color:#1B5E20;min-width:72px}
+.pg-ipa{color:#777;font-family:monospace;min-width:90px;font-size:clamp(10px,1.1vw,12px)}
+.pg-note{color:#555;line-height:1.4;flex:1;font-size:clamp(10px,1.1vw,12px)}
+.pron-tip{background:#FFF8E1;border:1px solid rgba(255,160,0,.4);border-radius:10px;padding:9px 14px;font-size:clamp(11px,1.2vw,13px);color:#5D4037;line-height:1.55;flex-shrink:0}
+
+/* SPOT IT */
+.spot-slide{background:#f8f9fa;flex-direction:column}
+.spot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;overflow-y:auto}
+.spot-box{background:#fff;border-radius:12px;padding:12px 16px;border:1.5px solid #e0e0e0;display:flex;flex-direction:column;gap:6px}
+.spot-phrase{font-size:clamp(16px,2vw,24px);font-weight:900;color:#222;padding:4px 0}
+.spot-q{font-size:clamp(11px,1.2vw,13px);color:#888;font-style:italic}
+.spot-reveal-btn{align-self:flex-start;background:#1B5E20;color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s}
+.spot-reveal-btn:hover{background:#154016}
+.spot-ans{display:none;background:#E8F5E9;border-radius:8px;padding:10px 12px;flex-direction:column;gap:4px}
+.spot-ans.open{display:flex}
+.spot-ans-title{font-size:clamp(12px,1.3vw,15px);font-weight:700;color:#1B5E20}
+.spot-hint{font-size:clamp(10px,1.1vw,12px);color:#555;line-height:1.5}
+
+/* TRY IT */
+.tryit-slide{background:#f8f9fa;flex-direction:column}
+.sent-list{display:flex;flex-direction:column;gap:9px;flex:1;overflow-y:auto}
+.sent-card{background:#fff;border-radius:12px;padding:12px 16px;border:1.5px solid #e0e0e0;display:flex;flex-direction:column;gap:5px}
+.sc-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B5E20;opacity:.8}
+.sca{font-size:clamp(12px,1.4vw,16px);color:#B71C1C;font-weight:600}
+.scb{font-size:clamp(13px,1.5vw,18px);color:#1B5E20;font-weight:800}
+.scn{font-size:clamp(10px,1.1vw,12px);color:#888;font-style:italic;line-height:1.45}
+.tryit-dir{background:#E8F5E9;border-radius:10px;padding:8px 16px;font-size:clamp(12px,1.3vw,14px);color:#1B5E20;font-weight:600;flex-shrink:0}
+
+/* ROLE-PLAY */
+.roleplay-slide{background:#021505;flex-direction:column}
+.rp-body{flex:1;display:flex;flex-direction:column;gap:10px;padding:12px 26px;min-height:0;overflow:hidden}
+.rp-scenario{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 18px;font-size:clamp(12px,1.3vw,14px);color:rgba(255,255,255,.75);flex-shrink:0;line-height:1.5}
+.rp-cols{display:grid;grid-template-columns:3fr 2fr;gap:14px;flex:1;min-height:0;overflow:hidden}
+.rp-col{background:rgba(255,255,255,.04);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:5px;overflow-y:auto}
+.rp-col-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;flex-shrink:0;color:#81C784}
+.rp-line{padding:5px 8px;border-radius:8px;display:flex;flex-direction:column;gap:2px}
+.rp-line.teacher{background:rgba(255,255,255,.04)}
+.rp-line.student{background:rgba(27,94,32,.3);border:1px solid rgba(129,199,132,.3)}
+.rp-speaker{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.5;color:#fff}
+.rp-text{font-size:clamp(11px,1.35vw,14px);color:#fff;line-height:1.6}
+.rp-text .hl{color:#81C784}
+.rp-tip{background:rgba(27,94,32,.2);border:1px solid rgba(129,199,132,.3);border-radius:10px;padding:8px 14px;font-size:clamp(11px,1.2vw,13px);color:#81C784;flex-shrink:0}
+.rp-tips-list{display:flex;flex-direction:column;gap:7px;font-size:clamp(11px,1.25vw,13px);color:rgba(255,255,255,.7)}
+
+/* BUILD IT */
+.build-slide{background:#fff;flex-direction:column}
+.build-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 40px;gap:16px;overflow-y:auto}
+.build-prompt{background:#E8F5E9;border-radius:14px;padding:18px 26px;max-width:760px;width:100%;text-align:center}
+.build-prompt h2{font-size:clamp(15px,1.9vw,22px);font-weight:800;color:#1B5E20;margin-bottom:8px}
+.build-prompt p{font-size:clamp(12px,1.4vw,16px);color:#2E7D32;line-height:1.6}
+.build-targets{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;width:100%}
+.build-target{border-radius:12px;padding:14px 18px;border:1.5px solid}
+.bt-label{font-size:clamp(13px,1.5vw,17px);font-weight:900;margin-bottom:4px;color:#1B5E20}
+.bt-ex{font-size:clamp(10px,1.1vw,12px);color:#888;margin-top:5px;line-height:1.5}
+
+/* QUIZ */
+.quizq-slide{background:#f8f9fa;flex-direction:column}
+.q-body{flex:1;display:flex;flex-direction:column;gap:10px;padding:10px 26px 12px;overflow-y:auto}
+.q-box{background:#fff;border-radius:12px;padding:12px 16px;border:1.5px solid #e0e0e0;display:flex;flex-direction:column;gap:5px}
+.q-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B5E20;opacity:.8}
+.q-text{font-size:clamp(12px,1.3vw,15px);font-weight:600;color:#222;line-height:1.45}
+.q-opts{display:flex;flex-direction:column;gap:3px}
+.q-opt{font-size:clamp(11px,1.15vw,13px);color:#555;padding:2px 0;line-height:1.4}
+.q-reveal-btn{align-self:flex-start;background:#1B5E20;color:#fff;border:none;border-radius:8px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s;margin-top:2px}
+.q-reveal-btn:hover{background:#154016}
+.q-ans-reveal{display:none;background:#E8F5E9;border-radius:8px;padding:8px 12px;margin-top:4px}
+.q-ans-reveal.open{display:block}
+.qr-opts{display:flex;flex-direction:column;gap:3px;margin-bottom:5px}
+.qr-opt{font-size:clamp(11px,1.15vw,13px);color:#555;padding:2px 6px;border-radius:5px}
+.qr-opt.correct{background:#1B5E20;color:#fff;font-weight:700}
+.qr-hint{font-size:clamp(10px,1.1vw,12px);color:#1B5E20;line-height:1.5}
+.think-banner{background:#E8F5E9;border-radius:10px;padding:8px 16px;font-size:clamp(12px,1.3vw,14px);color:#1B5E20;font-weight:600;flex-shrink:0}
+
+/* SUMMARY */
+.summary-slide{background:linear-gradient(140deg,#06091a 0%,#021505 55%,#06091a 100%);flex-direction:column}
+.sum-cards{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.sum-card{border-radius:16px;padding:18px 20px;min-width:150px;max-width:220px;flex:1}
+.sum-card-icon{font-size:clamp(22px,3vw,36px);margin-bottom:6px}
+.sum-card-title{font-size:clamp(13px,1.5vw,17px);font-weight:800;color:#fff;margin-bottom:5px;line-height:1.3}
+.sum-card-body{font-size:clamp(10px,1.1vw,12px);color:rgba(255,255,255,.7);line-height:1.5}
+.sum-foot{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 22px;font-size:clamp(12px,1.3vw,14px);color:rgba(255,255,255,.6);text-align:center;max-width:720px}
+
+/* FREE CONV */
+.freeconv-slide{background:#021505;flex-direction:column}
+.fc-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 40px;gap:14px}
+.fc-badge{background:rgba(27,94,32,.4);border:1px solid rgba(129,199,132,.5);border-radius:20px;padding:4px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#81C784}
+.fc-topic{font-size:clamp(22px,3.5vw,46px);font-weight:900;color:#fff;letter-spacing:-1px}
+.fc-questions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:720px}
+.fc-q{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 16px;font-size:clamp(13px,1.5vw,16px);color:rgba(255,255,255,.8);line-height:1.55}
+.fc-note{font-size:clamp(11px,1.2vw,13px);color:rgba(255,255,255,.4);text-align:center;max-width:680px;line-height:1.6}
+.fc-teacher{background:rgba(27,94,32,.15);border:1px solid rgba(129,199,132,.25);border-radius:10px;padding:10px 16px;font-size:clamp(11px,1.2vw,13px);color:#81C784;max-width:720px;width:100%;line-height:1.6}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="progress"></div>
+  <div id="slides"></div>
+  <div id="nav">
+    <button id="prevBtn" onclick="move(-1)">◀ Back</button>
+    <span id="counter"></span>
+    <button id="nextBtn" onclick="move(1)">Next ▶</button>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+
+const SPOT = [
+  {plain:'I\'m gonna be a little late.',
+   ans:'"I\'m <span class="sc">gonna</span> be a little late." = going to',
+   hint:'"gonna" = "going to" /ˈɡʌnə/ — 2 syllables. Note: you still need "I\'m" before it. "Gonna" can\'t replace the whole "I\'m going to" — just the "going to" part.（"gonna"は "going to" の部分だけを置き換える。主語とbe動詞はそのまま残る）'},
+  {plain:'Wanna grab coffee after this?',
+   ans:'"<span class="sc">Wanna</span> grab coffee after this?" = Do you want to',
+   hint:'"wanna" = "want to" /ˈwʌnə/. Here, "Do you" is also dropped — very casual. In a question, the full form would be "Do you want to grab coffee?"（"wanna"="want to"。疑問文では"Do you"も一緒に省略されることが多い）'},
+  {plain:'I gotta get some sleep tonight.',
+   ans:'"I <span class="sc">gotta</span> get some sleep tonight." = have got to / have to',
+   hint:'"gotta" = "have got to" or "have to" /ˈɡɒɾə/ 🇺🇸. The "tt" in the middle becomes a flap — a very light tap, almost like a /d/. "I gotta" is one of the most common expressions in casual 🇺🇸 English.（"gotta"の真ん中の"tt"はフラップ音 — 軽い"d"のような音になる）'},
+  {plain:'Dunno, ask someone else.',
+   ans:'"<span class="sc">Dunno</span>, ask someone else." = I don\'t know',
+   hint:'"dunno" = "I don\'t know" /ˈdʌnoʊ/ — 2 syllables, stress on first. Five words compressed into one! Very common as a standalone response. Don\'t use in formal or professional settings.（5語が1語に圧縮。フォーマルな場面では使わない）'},
+  {plain:'It\'s kinda hard to explain.',
+   ans:'"It\'s <span class="sc">kinda</span> hard to explain." = kind of',
+   hint:'"kinda" = "kind of" /ˈkaɪndə/ — softens the statement. Also: "sorta" = "sort of". These add a hedge（ぼかし）— "not exactly hard, but not easy either".（"kinda/sorta"は断言を和らげる表現 — 「どちらかというと」のニュアンス）'},
+  {plain:'Lemme just check my phone.',
+   ans:'"<span class="sc">Lemme</span> just check my phone." = Let me',
+   hint:'"lemme" = "let me" /ˈlɛmi/ — the two words fuse completely. Also common: "gimme a sec" (give me a second), "gotcha" (I got you / I understand).（"lemme"は"let me"が完全に融合した形。"gimme""gotcha"も同じパターン）'},
+];
+
+const EXPAND = [
+  {casual:'"I\'m gonna call you later."',   full:'I\'m going to call you later.',      note:'"gonna" replaces "going to" only — keep "I\'m"'},
+  {casual:'"Wanna try some?"',              full:'Do you want to try some?',            note:'"Do you" also drops in casual questions'},
+  {casual:'"I gotta go, sorry!"',           full:'I have got to go, sorry!',            note:'"gotta" = "have got to" — urgency/obligation（義務・急ぎ）'},
+  {casual:'"Gimme a sec."',                 full:'Give me a second.',                   note:'"gimme" = "give me" — fused completely'},
+  {casual:'"She\'s sorta right."',          full:'She\'s sort of right.',               note:'"sorta" = "sort of" — softens the claim'},
+  {casual:'"Gotcha! See you at 7."',        full:'I got you! / Got it! See you at 7.',  note:'"gotcha" = "I got you" — confirms understanding'},
+];
+
+const COMPRESS = [
+  {formal:'I\'m going to think about it.',    casual:'"I\'m gonna think about it."',    note:'"going to" → "gonna"'},
+  {formal:'Do you want to join us?',          casual:'"Wanna join us?"',                note:'"Do you want to" → "Wanna"'},
+  {formal:'I have got to get some rest.',     casual:'"I gotta get some rest."',         note:'"have got to" → "gotta"'},
+  {formal:'I don\'t know, honestly.',         casual:'"Dunno, honestly."',               note:'"I don\'t know" → "dunno"'},
+  {formal:'It\'s kind of complicated.',       casual:'"It\'s kinda complicated."',        note:'"kind of" → "kinda"'},
+  {formal:'Let me see... around 3?',          casual:'"Lemme see... around 3?"',          note:'"let me" → "lemme"'},
+];
+
+const QUIZ = [
+  {q:'Which sentence is grammatically correct with "gonna"?',
+   opts:['a) "Gonna rain today."','b) "I gonna go now."','c) "I\'m gonna be late." ✓','d) "She gonna call you."'],
+   ans:2,
+   hint:'"gonna" replaces "going to" — NOT "am/is/are going to" entirely. The subject and be-verb stay: "I\'m gonna", "She\'s gonna", "They\'re gonna". Without them, the sentence is incomplete.（"gonna"は"going to"の部分だけ。主語とbe動詞はそのまま必要）'},
+  {q:'"Gotta" is a casual form of:',
+   opts:['a) "going to"','b) "got a"','c) "have got to" / "have to"','d) "getting to"'],
+   ans:2,
+   hint:'"gotta" = "have got to" or "have to" — expresses necessity or obligation（義務・必要性）. "I gotta go" = "I have to go". Not to be confused with "gonna" (going to).（"gotta"は義務を表す。"gonna"（これからすること）と混同しないよう注意）'},
+  {q:'What does "Wanna grab lunch?" mean in full?',
+   opts:['a) "Want a lunch?"','b) "Do you want to grab lunch?"','c) "We\'re going to grab lunch."','d) "Wanna you grab lunch?"'],
+   ans:1,
+   hint:'"wanna" = "want to". In a casual question, "Do you" is also dropped. Full: "Do you want to grab lunch?" — three words ("Do you want to") become one ("Wanna").（"wanna"="want to"。疑問文では"Do you"も省略される）'},
+  {q:'Which expressions are appropriate in a job interview?',
+   opts:['a) "I\'m gonna give this my best shot."','b) "Dunno, that\'s a tough one."','c) "I kinda enjoy problem-solving."','d) None — all are too casual for a formal setting.'],
+   ans:3,
+   hint:'Gonna, dunno, kinda — all are very casual（非常にカジュアル）and inappropriate in formal or professional settings（フォーマル・プロの場面では不適切）. Use standard forms: "I\'m going to...", "I\'m not sure...", "I quite enjoy..."（フォーマルな場面では標準形を使う）'},
+];
+
+// ═══════════════════════════════════════════
+//  BUILDERS
+// ═══════════════════════════════════════════
+function titleHTML(){
+  return `<div class="slide title-slide">
+  <div style="max-width:820px;padding:18px;text-align:center">
+    <div class="adv-badge">Advanced Pronunciation</div>
+    <h1><em>Spoken Shortcuts</em></h1>
+    <div style="font-size:clamp(16px,2.5vw,28px);font-weight:700;color:rgba(255,255,255,.45);margin-top:4px">（会話の超短縮形 — gonna · wanna · gotta · dunno）</div>
+    <p class="title-sub">"I'm going to" → "I'm gonna" — native speakers compress common phrases into single sounds.</p>
+    <div class="goal-box">
+      <p>🎯 <strong>Today's Goal:</strong> Recognise and use the most common spoken shortcuts naturally — and know when <em>not</em> to use them</p>
+      <p style="margin-top:4px">⏱ 45 minutes &nbsp;·&nbsp; 12 slides &nbsp;·&nbsp; Use ◀ ▶ or arrow keys to navigate</p>
+    </div>
+  </div></div>`;
+}
+
+function warmupHTML(){
+  return `<div class="slide warmup-slide">
+  <div class="s-head" style="background:#1B5E20">Warm-Up <span class="badge">You first! 🗣️</span> <span class="student-badge">Student · 3 min</span></div>
+  <div class="warmup-body">
+    <div class="warmup-prompt">What do you think these mean? Match them to their full forms — then say them out loud.</div>
+    <div class="warmup-words">
+      <div class="warmup-word"><div class="ww-text">gonna</div><div class="ww-q">= going to? get on? go now?</div></div>
+      <div class="warmup-word"><div class="ww-text">wanna</div><div class="ww-q">= want to? wonder? wander?</div></div>
+      <div class="warmup-word"><div class="ww-text">gotta</div><div class="ww-q">= got to? go to? got a?</div></div>
+      <div class="warmup-word"><div class="ww-text">dunno</div><div class="ww-q">= done now? do know? don't know?</div></div>
+    </div>
+    <div class="warmup-q">💬 Have you heard any of these in movies or music? Can you think of a sentence using one?</div>
+    <div class="teacher-note">📝 <strong>Teacher note:</strong> Let the student guess first. Then confirm: gonna = going to / wanna = want to / gotta = have got to / dunno = I don't know. Say each one at natural speed and have the student repeat. Notice how compressed they sound.</div>
+  </div></div>`;
+}
+
+function conceptHTML(){
+  const groupA = [
+    ['going to','gonna','"I\'m gonna be late."'],
+    ['want to','wanna','"Wanna grab lunch?"'],
+    ['have to / got to','hafta / gotta','"I hafta / gotta go!"'],
+    ['let me','lemme','"Lemme check."'],
+  ];
+  const groupB = [
+    ['kind of','kinda','"It\'s kinda weird."'],
+    ['sort of','sorta','"I\'m sorta tired."'],
+    ['out of','outta','"Get outta here!"'],
+    ['lots of','lotsa','"lotsa people"'],
+  ];
+  const groupC = [
+    ['give me','gimme','"Gimme a sec."'],
+    ['I don\'t know','dunno','"Dunno, maybe."'],
+    ['I got you / I understand','gotcha','"Gotcha! See you then."'],
+    ['because','cuz / cos','"Late cuz of traffic."'],
+  ];
+  const rowsA = groupA.map(([f,c,e])=>`<div class="sc-row"><div class="sc-row-top"><span class="sc-full">${f}</span><span class="sc-arrow">→</span><span class="sc" style="font-size:1em">${c}</span></div><div class="sc-ex">${e}</div></div>`).join('');
+  const rowsB = groupB.map(([f,c,e])=>`<div class="sc-row"><div class="sc-row-top"><span class="sc-full">${f}</span><span class="sc-arrow">→</span><span class="sc" style="font-size:1em">${c}</span></div><div class="sc-ex">${e}</div></div>`).join('');
+  const rowsC = groupC.map(([f,c,e])=>`<div class="sc-row"><div class="sc-row-top"><span class="sc-full">${f}</span><span class="sc-arrow">→</span><span class="sc" style="font-size:1em">${c}</span></div><div class="sc-ex">${e}</div></div>`).join('');
+  return `<div class="slide concept-slide">
+  <div class="s-head" style="background:#1B5E20">Key Concept — Spoken Shortcuts <span class="badge">Teacher · 3 min</span></div>
+  <div class="concept-body">
+    <div class="concept-cols">
+      <div class="concept-col" style="background:#E8F5E9;border:2px solid rgba(27,94,32,.25)">
+        <div class="cc-title" style="color:#1B5E20">Group A — "to" fusions（"to"の融合）</div>
+        <div class="cc-body">The word "to" fuses with the verb before it.（"to"が前の動詞と溶け合う）</div>
+        ${rowsA}
+      </div>
+      <div class="concept-col" style="background:#F1F8E9;border:2px solid rgba(27,94,32,.15)">
+        <div class="cc-title" style="color:#1B5E20">Group B — "of" fusions（"of"の融合）</div>
+        <div class="cc-body">"of" weakens to /ə/ and fuses with the word before it.（"of"が弱まって前の語とくっつく）</div>
+        ${rowsB}
+      </div>
+      <div class="concept-col" style="background:#E8F5E9;border:2px solid rgba(27,94,32,.2)">
+        <div class="cc-title" style="color:#1B5E20">Group C — other fusions（その他）</div>
+        <div class="cc-body">Multiple words collapse into a single spoken unit.（複数語が1つの音のかたまりになる）</div>
+        ${rowsC}
+      </div>
+    </div>
+    <div class="concept-rule">⚠️ These exist in <strong>spoken casual English only</strong>（会話のみ）— never in emails, academic writing, or formal speech. <span style="font-weight:400;font-size:.9em">（メール・論文・フォーマルな場面では絶対に使わない）</span></div>
+  </div></div>`;
+}
+
+function pronHTML(){
+  return `<div class="slide pron-slide">
+  <div class="s-head" style="background:#1B5E20">How They Sound — Pronunciation Focus 🔊 <span class="badge">Teacher · 2 min</span></div>
+  <div class="pron-body">
+    <div class="pron-col">
+      <div class="pron-group" style="background:#E8F5E9;border-color:rgba(27,94,32,.25)">
+        <div class="pg-title" style="color:#1B5E20">gonna / wanna / hafta（"to" 融合グループ）</div>
+        <div class="pg-row"><span class="pg-form">gonna</span><span class="pg-ipa">/ˈɡʌnə/</span><span class="pg-note">2 syllables. Stress on 1st. "GUN-uh". Need "I'm/she's/they're" before it.（前に主語＋be動詞が必要）</span></div>
+        <div class="pg-row"><span class="pg-form">wanna</span><span class="pg-ipa">/ˈwʌnə/</span><span class="pg-note">2 syllables. "WUN-uh". In questions "Do you" also drops: "Wanna go?"（疑問文では"Do you"も省略）</span></div>
+        <div class="pg-row"><span class="pg-form">gotta</span><span class="pg-ipa">/ˈɡɒɾə/ 🇺🇸</span><span class="pg-note">The middle "tt" = flap /ɾ/ in 🇺🇸 — a quick tap, almost like /d/. "GOD-uh".（"tt"はフラップ音 — 軽い"d"のような音）</span></div>
+        <div class="pg-row"><span class="pg-form">hafta</span><span class="pg-ipa">/ˈhæftə/</span><span class="pg-note">"have to" → the /v/ becomes /f/ before the /t/. "HAF-tuh".（"v"が"t"の前で"f"になる）</span></div>
+      </div>
+      <div class="pron-group" style="background:#F1F8E9;border-color:rgba(27,94,32,.15)">
+        <div class="pg-title" style="color:#1B5E20">kinda / sorta / outta（"of" 融合グループ）</div>
+        <div class="pg-row"><span class="pg-form">kinda</span><span class="pg-ipa">/ˈkaɪndə/</span><span class="pg-note">"kind of" — the /d/ stays. "KAI-nduh". Adds a softening hedge.（断言をぼかす効果がある）</span></div>
+        <div class="pg-row"><span class="pg-form">sorta</span><span class="pg-ipa">/ˈsɔːrtə/</span><span class="pg-note">"sort of" — same pattern as kinda. "SOR-tuh".（"kinda"と同じパターン）</span></div>
+        <div class="pg-row"><span class="pg-form">outta</span><span class="pg-ipa">/ˈaʊɾə/ 🇺🇸</span><span class="pg-note">"out of" — "tt" = flap again. "OW-duh". "Get outta here!" = casual surprise/disbelief.（"Get outta here!"は驚きや冗談に使う）</span></div>
+      </div>
+    </div>
+    <div class="pron-col">
+      <div class="pron-group" style="background:#E8F5E9;border-color:rgba(27,94,32,.2)">
+        <div class="pg-title" style="color:#1B5E20">dunno / gimme / lemme / gotcha</div>
+        <div class="pg-row"><span class="pg-form">dunno</span><span class="pg-ipa">/ˈdʌnoʊ/</span><span class="pg-note">"I don't know" → 5 syllables become 2. Stress on 1st. Often said with a shrug.（5音節が2音節に。肩をすくめながら言うことが多い）</span></div>
+        <div class="pg-row"><span class="pg-form">gimme</span><span class="pg-ipa">/ˈɡɪmi/</span><span class="pg-note">"give me" — both words fuse. "GIM-ee". "Gimme a sec/break/hand."（"a sec / a break / a hand"などと一緒に使う）</span></div>
+        <div class="pg-row"><span class="pg-form">lemme</span><span class="pg-ipa">/ˈlɛmi/</span><span class="pg-note">"let me" → "LEM-ee". "Lemme think / check / see."（考える・確認する・見るなどの動作の前に使う）</span></div>
+        <div class="pg-row"><span class="pg-form">gotcha</span><span class="pg-ipa">/ˈɡɒtʃə/</span><span class="pg-note">"I got you" = I understand / got it. Also: a prank reveal（いたずらの告白）. "Gotcha! You believed me!"</span></div>
+      </div>
+      <div class="pron-tip">💡 <strong>Key pattern:</strong> The unstressed second word always becomes schwa /ə/. <span style="color:#5D4037">（アクセントのない2番目の語は常に /ə/ になる）</span><br>going <em>to</em> → gonna /ˈɡʌn<strong>ə</strong>/ &nbsp;·&nbsp; kind <em>of</em> → kinda /ˈkaɪnd<strong>ə</strong>/ &nbsp;·&nbsp; let <em>me</em> → lemme /ˈlɛm<strong>ɪ</strong>/</div>
+    </div>
+  </div></div>`;
+}
+
+function spotHTML(){
+  const boxes = SPOT.map((s,i)=>{
+    const id=`spot-${i}`;
+    return `<div class="spot-box">
+      <div class="spot-phrase">${s.plain}</div>
+      <div class="spot-q">Find the spoken shortcut — what does it stand for?（短縮形を探して、元の表現を答えよう）</div>
+      <button class="spot-reveal-btn" onclick="toggleAns(this,'${id}')">Reveal ▾</button>
+      <div class="spot-ans" id="${id}">
+        <div class="spot-ans-title">${s.ans}</div>
+        <div class="spot-hint">${s.hint}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="slide spot-slide">
+  <div class="s-head" style="background:#1B5E20">Spot It — Find the Shortcut <span class="badge">👀 Student · 5 min</span> <span class="student-badge">Student · 5 min</span></div>
+  <div class="s-body" style="flex-direction:column">
+    <div class="spot-grid">${boxes}</div>
+  </div></div>`;
+}
+
+function tryit1HTML(){
+  const cards = EXPAND.map((e,i)=>`
+    <div class="sent-card">
+      <div class="sc-num">Sentence ${i+1}</div>
+      <div class="sca">Casual: ${e.casual}</div>
+      <div class="scb">Full: ${e.full}</div>
+      <div class="scn">📌 ${e.note}</div>
+    </div>`).join('');
+  return `<div class="slide tryit-slide">
+  <div class="s-head" style="background:#1B5E20">Try It #1 — Expand It <span class="badge">🎧 Both · 5 min</span> <span class="student-badge">Student · 5 min</span></div>
+  <div class="s-body" style="flex-direction:column">
+    <div class="tryit-dir">Teacher says the casual version. Student gives the full formal form.（先生がカジュアルな表現を言う → 生徒がフルの文に言い直す）</div>
+    <div class="sent-list">${cards}</div>
+  </div></div>`;
+}
+
+function tryit2HTML(){
+  const cards = COMPRESS.map((e,i)=>`
+    <div class="sent-card">
+      <div class="sc-num">Sentence ${i+1}</div>
+      <div class="sca">Formal: ${e.formal}</div>
+      <div class="scb">Say it casually: ${e.casual}</div>
+      <div class="scn">📌 ${e.note}</div>
+    </div>`).join('');
+  return `<div class="slide tryit-slide">
+  <div class="s-head" style="background:#1B5E20">Try It #2 — Compress It <span class="badge">🗣️ Student · 5 min</span> <span class="student-badge">Student · 5 min</span></div>
+  <div class="s-body" style="flex-direction:column">
+    <div class="tryit-dir">Read the formal sentence, then say it the casual way — at natural speed.（フォーマルな文を読んで、カジュアルな言い方で速く言い直す）</div>
+    <div class="sent-list">${cards}</div>
+  </div></div>`;
+}
+
+function roleplayHTML(){
+  const lines = [
+    {r:'teacher',s:'Teacher',t:'Hey, <span class="hl">wanna</span> come over tonight? I\'m making dinner.'},
+    {r:'student',s:'Student',t:'I dunno... I kinda hafta finish some stuff first.'},
+    {r:'teacher',s:'Teacher',t:'Aw come on! It\'s <span class="hl">gonna</span> be fun. Nothing fancy.'},
+    {r:'student',s:'Student',t:'What time were you thinking?'},
+    {r:'teacher',s:'Teacher',t:'<span class="hl">Lemme</span> check... around 7? <span class="hl">Gimme</span> a heads up by 6.'},
+    {r:'student',s:'Student',t:'Okay, I think I can make it. I\'ve gotta be home by 10 though.'},
+    {r:'teacher',s:'Teacher',t:'That\'s totally fine. <span class="hl">Gotcha</span> — dinner at 7, done by 10.'},
+    {r:'student',s:'Student',t:'Sounds good! I\'m kinda excited now actually.'},
+  ];
+  const lineHTML = lines.map(l=>`
+    <div class="rp-line ${l.r}">
+      <div class="rp-speaker">${l.s}</div>
+      <div class="rp-text">${l.t}</div>
+    </div>`).join('');
+  return `<div class="slide roleplay-slide">
+  <div class="s-head" style="background:#1B5E20">Role-Play — Casual Invitation <span class="badge">🎭 Both · 7 min</span> <span class="student-badge">Student · 7 min</span></div>
+  <div class="rp-body">
+    <div class="rp-scenario">📍 <strong>Scenario:</strong> A friend inviting you over for dinner. Use today's shortcuts naturally — highlighted ones are key.（夕食に誘われる場面。今日の短縮形を自然に使いながら会話する）</div>
+    <div class="rp-cols">
+      <div class="rp-col">
+        <div class="rp-col-label">Script</div>
+        ${lineHTML}
+      </div>
+      <div class="rp-col">
+        <div class="rp-col-label">Checklist</div>
+        <div class="rp-tips-list">
+          <div>🟢 <strong>gonna</strong> — need "I'm / she's / it's" before it</div>
+          <div>🟢 <strong>wanna</strong> — "Do you" drops in questions</div>
+          <div>🟢 <strong>gotta / hafta</strong> — obligation（義務・必要性）</div>
+          <div>🟢 <strong>kinda</strong> — softens the statement（ぼかす）</div>
+          <div>🟢 <strong>dunno</strong> — hesitation, not sure（迷い・不確か）</div>
+          <div>🟢 <strong>lemme / gimme / gotcha</strong> — quick responses</div>
+          <div>🟢 After script: improvise 2–3 more lines using shortcuts</div>
+        </div>
+        <div class="rp-tip" style="margin-top:auto">💡 Say them at natural speed — these only work when they're fast!（速く言ってこそ自然に聞こえる）</div>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function buildHTML(){
+  const targets = [
+    {label:'Ask if someone wants to watch a movie.',ex:'Try: "Wanna watch a movie?"',bg:'#E8F5E9',bc:'rgba(27,94,32,.3)'},
+    {label:'Say you have to leave right now.',ex:'Try: "I gotta go!" or "Gotta run!"',bg:'#F1F8E9',bc:'rgba(27,94,32,.15)'},
+    {label:'Tell someone you\'re not sure about something.',ex:'Try: "Dunno..." or "I\'m kinda not sure."',bg:'#E8F5E9',bc:'rgba(27,94,32,.2)'},
+    {label:'Ask your friend to give you a moment.',ex:'Try: "Gimme a sec." or "Lemme just..."',bg:'#F1F8E9',bc:'rgba(27,94,32,.15)'},
+  ];
+  const tHTML = targets.map(t=>`
+    <div class="build-target" style="background:${t.bg};border-color:${t.bc}">
+      <div class="bt-label">${t.label}</div>
+      <div class="bt-ex">💡 ${t.ex}</div>
+    </div>`).join('');
+  return `<div class="slide build-slide">
+  <div class="s-head" style="background:#1B5E20">Build It — Say It Casually <span class="badge">🔨 Student · 4 min</span> <span class="student-badge">Student · 4 min</span></div>
+  <div class="build-body">
+    <div class="build-prompt">
+      <h2>Use a spoken shortcut for each situation</h2>
+      <p>Say a natural, casual response. There's no single right answer — the goal is to sound relaxed and natural.（状況に合ったカジュアルな表現を言う。正解は1つじゃない）</p>
+    </div>
+    <div class="build-targets">${tHTML}</div>
+  </div></div>`;
+}
+
+function quizHTML(){
+  const boxes = QUIZ.map((q,i)=>{
+    const id=`qz-${i}`;
+    const opts=q.opts.map(o=>`<div class="q-opt">${o}</div>`).join('');
+    const ropts=q.opts.map((o,j)=>`<div class="qr-opt${j===q.ans?' correct':''}">${o}</div>`).join('');
+    return `<div class="q-box">
+      <div class="q-num">Q${i+1}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-opts">${opts}</div>
+      <button class="q-reveal-btn" onclick="toggleAns(this,'${id}')">Answer ▾</button>
+      <div class="q-ans-reveal" id="${id}">
+        <div class="qr-opts">${ropts}</div>
+        <div class="qr-hint">${q.hint}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="slide quizq-slide">
+  <div class="s-head" style="background:#1B5E20">Quick Quiz <span class="badge">🧠 Both · 4 min</span></div>
+  <div class="q-body">
+    <div class="think-banner">Think first, then check.（まず考えてから答えを確認しよう）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${boxes}</div>
+  </div></div>`;
+}
+
+function summaryHTML(){
+  return `<div class="slide summary-slide">
+  <div class="s-head" style="background:#1B5E20">Summary — Spoken Shortcuts <span class="badge">✅ 2 min</span></div>
+  <div class="s-body" style="flex-direction:column;align-items:center;justify-content:center;gap:18px">
+    <div class="sum-cards">
+      <div class="sum-card" style="background:rgba(27,94,32,.4)">
+        <div class="sum-card-icon">🔀</div>
+        <div class="sum-card-title">"to" fusions</div>
+        <div class="sum-card-body">going to / want to / have to / let me（前の動詞と"to"が融合）<br><em>gonna · wanna · gotta · hafta · lemme</em></div>
+      </div>
+      <div class="sum-card" style="background:rgba(21,64,16,.5)">
+        <div class="sum-card-icon">🔀</div>
+        <div class="sum-card-title">"of" fusions</div>
+        <div class="sum-card-body">kind of / sort of / out of（前の語と"of"が融合）<br><em>kinda · sorta · outta · lotsa</em></div>
+      </div>
+      <div class="sum-card" style="background:rgba(27,94,32,.35)">
+        <div class="sum-card-icon">💬</div>
+        <div class="sum-card-title">Other fusions</div>
+        <div class="sum-card-body">Multiple words → 1 unit（複数語が1つに）<br><em>dunno · gimme · gotcha · cuz</em></div>
+      </div>
+      <div class="sum-card" style="background:rgba(10,40,12,.6)">
+        <div class="sum-card-icon">⚠️</div>
+        <div class="sum-card-title">Casual ONLY</div>
+        <div class="sum-card-body">Friends, informal chat only.（友人・カジュアルな場面のみ）<br>Never in emails, presentations, or formal speech.（メール・プレゼン・フォーマルな場面では絶対NG）</div>
+      </div>
+    </div>
+    <div class="sum-foot">💡 "I'm gonna" — not just "gonna". Subject + be-verb must stay.（"gonna"の前には必ず主語とbe動詞が必要）</div>
+  </div></div>`;
+}
+
+function freeconvHTML(){
+  return `<div class="slide freeconv-slide">
+  <div class="s-head" style="background:#1B5E20">Free Conversation <span class="badge">🗣️ Student-led · 10 min</span> <span class="student-badge">Student · 10 min</span></div>
+  <div class="fc-body">
+    <div class="fc-badge">Today's Topic</div>
+    <div class="fc-topic">Dream Weekend</div>
+    <div class="fc-questions">
+      <div class="fc-q">💭 If you had a completely free weekend with no obligations, what would you do?</div>
+      <div class="fc-q">💭 Is there something you've been wanting to do but never have time for?</div>
+      <div class="fc-q">💭 Do you prefer a relaxing weekend or an active one? Has that changed over the years?</div>
+    </div>
+    <div class="fc-note">（理想の週末 — 自由な時間の使い方、やりたいこと、好みの休日スタイル）</div>
+    <div class="fc-teacher">📝 <strong>Teacher goal:</strong> Encourage natural use of today's shortcuts — "I'd wanna...", "I'm kinda...", "I dunno, maybe...", "I'm gonna..." — without forcing them.</div>
+  </div></div>`;
+}
+
+const SLIDES_HTML = [
+  titleHTML(),
+  warmupHTML(),
+  conceptHTML(),
+  pronHTML(),
+  spotHTML(),
+  tryit1HTML(),
+  tryit2HTML(),
+  roleplayHTML(),
+  buildHTML(),
+  quizHTML(),
+  summaryHTML(),
+  freeconvHTML(),
+];
+
+// ═══════════════════════════════════════════
+//  ENGINE
+// ═══════════════════════════════════════════
+let cur = 0;
+const total = SLIDES_HTML.length;
+
+function build(){
+  document.getElementById('slides').innerHTML = SLIDES_HTML.join('');
+}
+
+function render(){
+  document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i===cur));
+  document.getElementById('counter').textContent = `${cur+1} / ${total}`;
+  document.getElementById('prevBtn').disabled = cur===0;
+  document.getElementById('nextBtn').disabled = cur===total-1;
+  document.getElementById('progress').style.width = `${((cur+1)/total)*100}%`;
+}
+
+function move(d){
+  const n = cur+d;
+  if(n>=0 && n<total){cur=n;render();}
+}
+
+function toggleAns(btn,id){
+  const el=document.getElementById(id);
+  const open=el.classList.toggle('open');
+  btn.textContent=open?'Hide ▴':'Reveal ▾';
+  if(btn.classList.contains('q-reveal-btn')) btn.textContent=open?'Hide ▴':'Answer ▾';
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') move(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') move(-1);
+});
+
+build();
+render();
+</script>
+</body>
+</html>
